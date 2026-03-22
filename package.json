@@ -4,12 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "node server.ts",
+    "start": "NODE_ENV=production node server.ts",
+    "build": "pnpm run build:client && pnpm run build:server",
+    "build:client": "NODE_ENV=production vite build --outDir dist/client --ssrManifest",
+    "build:server": "NODE_ENV=production vite build --outDir dist/server --ssr src/entry-server.tsx",
+    "lint": "eslint ."
   },
   "dependencies": {
+    "@fastify/compress": "^8",
+    "@fastify/middie": "^9",
+    "@fastify/static": "^8",
+    "fastify": "^5",
     "react": "catalog:react-latest",
     "react-dom": "catalog:react-latest"
   },
@@ -23,6 +29,7 @@
     "eslint-plugin-react-hooks": "catalog:eslint-latest",
     "eslint-plugin-react-refresh": "catalog:eslint-latest",
     "globals": "catalog:eslint-latest",
+    "tsx": "^4",
     "typescript": "catalog:typescript-latest",
     "typescript-eslint": "catalog:eslint-latest",
     "vite": "catalog:vite-latest"

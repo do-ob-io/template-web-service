@@ -1,19 +1,17 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import { defineConfig, globalIgnores } from 'eslint/config';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import { configs as reactRefreshConfigs } from 'eslint-plugin-react-refresh';
+import globals from 'globals';
 
 import config from '../../eslint.config.mjs';
 
 export default defineConfig([
   ...config,
-  globalIgnores(['dist']),
+  globalIgnores([ 'dist' ]),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: [ '**/*.{ts,tsx}' ],
     extends: [
-      reactRefresh.configs.vite,
+      reactRefreshConfigs.vite,
     ],
     settings: {
       'better-tailwindcss': {
