@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node server.ts",
-    "start": "NODE_ENV=production node server.ts",
-    "build": "pnpm run build:client && pnpm run build:server",
-    "build:client": "NODE_ENV=production vite build --outDir dist/client --ssrManifest",
-    "build:server": "NODE_ENV=production vite build --outDir dist/server --ssr src/entry-server.tsx",
+    "dev": "node src/app.ts",
+    "start": "NODE_ENV=production node dist/app.js",
+    "build": "pnpm run build:app && pnpm run build:frontend:client && pnpm run build:frontend:server",
+    "build:frontend:client": "NODE_ENV=production vite build --outDir dist/client --ssrManifest",
+    "build:frontend:server": "NODE_ENV=production vite build --outDir dist/server --ssr src/frontend/entry-server.tsx",
+    "build:app": "NODE_ENV=production vite build --config vite.config.app.ts",
     "lint": "eslint ."
   },
   "dependencies": {

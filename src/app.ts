@@ -14,11 +14,19 @@ const isProduction = process.env['NODE_ENV'] === 'production';
 const port = Number(process.env['PORT'] ?? 5173);
 const base = process.env['BASE'] ?? '/';
 
+/**
+ * Resolves the project root directory.
+ *
+ * In development, `__dirname` is `<project>/src`, so root is one level up.
+ * In production, `__dirname` is `<project>/dist`, so root is also one level up.
+ */
+const root = path.resolve(__dirname, '..');
+
 console.log(`Starting server in ${isProduction ? 'production' : 'development'} mode...`);
 
 /** Cached production template */
 const templateHtml = isProduction
-  ? await fs.readFile(path.resolve(__dirname, 'dist/client/index.html'), 'utf8')
+  ? await fs.readFile(path.resolve(__dirname, 'client/index.html'), 'utf8')
   : '';
 
 /**
@@ -38,7 +46,7 @@ async function createServer(): Promise<void> {
   if (isProduction) {
     await app.register(compress);
     await app.register(staticFiles, {
-      root: path.resolve(__dirname, 'dist/client'),
+      root: path.resolve(__dirname, 'client'),
       prefix: base,
       index: false,
       decorateReply: false,
@@ -46,6 +54,7 @@ async function createServer(): Promise<void> {
   } else {
     const { createServer: createViteServer } = await import('vite');
     vite = await createViteServer({
+      root,
       server: { middlewareMode: true },
       appType: 'custom',
       base,
@@ -64,12 +73,13 @@ async function createServer(): Promise<void> {
 
       if (isProduction) {
         template = templateHtml;
-        const { render: prodRender } = await import(/* @vite-ignore */ './dist/server/entry-server.js' as string);
+        const ssrPath = path.resolve(__dirname, 'server/entry-server.js');
+        const { render: prodRender } = await import(/* @vite-ignore */ ssrPath);
         render = prodRender as typeof render;
       } else {
-        template = await fs.readFile(path.resolve(__dirname, 'index.html'), 'utf8');
+        template = await fs.readFile(path.resolve(root, 'index.html'), 'utf8');
         template = await vite!.transformIndexHtml(url, template);
-        const { render: devRender } = await vite!.ssrLoadModule('/src/entry-server.tsx');
+        const { render: devRender } = await vite!.ssrLoadModule('/src/frontend/entry-server.tsx');
         render = devRender as typeof render;
       }
 
