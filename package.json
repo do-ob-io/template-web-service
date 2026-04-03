@@ -16,8 +16,8 @@
     "@fastify/compress": "catalog:fastify",
     "@fastify/middie": "catalog:fastify",
     "@fastify/static": "catalog:fastify",
-    "@tanstack/react-router": "^1.168.10",
-    "@tanstack/router-vite-plugin": "^1.166.27",
+    "@tanstack/react-router": "catalog:tanstack",
+    "@tanstack/router-vite-plugin": "catalog:tanstack",
     "fastify": "catalog:fastify",
     "react": "catalog:react",
     "react-dom": "catalog:react"
@@ -32,7 +32,7 @@
     "eslint-plugin-react-hooks": "catalog:eslint",
     "eslint-plugin-react-refresh": "catalog:eslint",
     "globals": "catalog:eslint",
-    "tsx": "^4",
+    "tsx": "^4.21.0",
     "typescript": "catalog:typescript",
     "typescript-eslint": "catalog:eslint",
     "vite": "catalog:vite"
