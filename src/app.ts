@@ -49,6 +49,7 @@ async function createServer(): Promise<void> {
       root: path.resolve(__dirname, 'client'),
       prefix: base,
       index: false,
+      wildcard: false,
       decorateReply: false,
     });
   } else {
@@ -66,7 +67,7 @@ async function createServer(): Promise<void> {
 
   app.get('/*', async (request, reply) => {
     try {
-      const url = request.url.replace(base, '');
+      const url = '/' + request.url.replace(base, '');
 
       let template: string;
       let render: (url: string) => Promise<{ html: string; head?: string }>;
