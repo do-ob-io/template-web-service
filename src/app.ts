@@ -64,12 +64,12 @@ async function createServer(): Promise<void> {
     app.use(vite.middlewares);
   }
 
-  app.get('/portal', async (request, reply) => {
+  app.get('/*', async (request, reply) => {
     try {
       const url = request.url.replace(base, '');
 
       let template: string;
-      let render: (url: string) => { html: string; head?: string };
+      let render: (url: string) => Promise<{ html: string; head?: string }>;
 
       if (isProduction) {
         template = templateHtml;
@@ -83,7 +83,7 @@ async function createServer(): Promise<void> {
         render = devRender as typeof render;
       }
 
-      const rendered = render(url);
+      const rendered = await render(url);
 
       const html = template
         .replace('<!--app-head-->', rendered.head ?? '')

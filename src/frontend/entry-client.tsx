@@ -1,12 +1,15 @@
+import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 
 import './index.css';
-import App from './app.tsx';
+import { createRouter } from './router.tsx';
+
+const router = createRouter();
 
 hydrateRoot(
   document.querySelector('#root')!,
   <StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </StrictMode>,
 );

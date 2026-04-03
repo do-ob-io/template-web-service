@@ -16,6 +16,8 @@
     "@fastify/compress": "catalog:fastify",
     "@fastify/middie": "catalog:fastify",
     "@fastify/static": "catalog:fastify",
+    "@tanstack/react-router": "^1.168.10",
+    "@tanstack/router-vite-plugin": "^1.166.27",
     "fastify": "catalog:fastify",
     "react": "catalog:react",
     "react-dom": "catalog:react"
