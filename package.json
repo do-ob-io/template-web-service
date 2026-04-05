@@ -12,7 +12,7 @@
   "dependencies": {
     "@fastify/compress": "catalog:fastify",
     "fastify": "catalog:fastify",
-    "fastify-type-provider-zod": "catalog:fastify",
+    "@fastify/type-provider-json-schema-to-ts": "catalog:fastify",
     "zod": "catalog:data"
   },
   "devDependencies": {

@@ -1,32 +1,28 @@
 import compress from '@fastify/compress';
+import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import Fastify from 'fastify';
-import {
-  serializerCompiler,
-  validatorCompiler,
-  type ZodTypeProvider,
-} from 'fastify-type-provider-zod';
-import { z } from 'zod';
 
-const port = Number(process.env['PORT'] ?? 3000);
+import {
+  echoBodySchema,
+  echoResponseSchema,
+  healthResponseSchema,
+} from '@/schemas/index.js';
+import { SETTINGS } from '@/settings.js';
+
 
 /**
  * Creates and configures the Fastify application instance.
  *
- * Registers compression, installs the Zod type provider for fully-typed
- * request validation and response serialization, and mounts all routes.
+ * Registers compression and mounts all routes. Request bodies are validated
+ * at runtime against JSON Schemas defined in `src/schemas/`. TypeScript types
+ * for handlers are inferred automatically by `@fastify/type-provider-json-schema-to-ts`.
  *
  * @returns The configured Fastify instance.
  */
 export async function createApp() {
-  const app = Fastify({ logger: { level: 'error' } });
-
-  // Zod type provider: validates incoming requests and serializes responses
-  app.setValidatorCompiler(validatorCompiler);
-  app.setSerializerCompiler(serializerCompiler);
+  const app = Fastify({ logger: { level: 'error' } }).withTypeProvider<JsonSchemaToTsProvider>();
 
   await app.register(compress);
-
-  const typed = app.withTypeProvider<ZodTypeProvider>();
 
   /**
    * GET /health
@@ -35,14 +31,12 @@ export async function createApp() {
    *
    * @returns `{ status: 'ok' }`
    */
-  typed.get(
+  app.get(
     '/health',
     {
       schema: {
         response: {
-          200: z.object({
-            status: z.string(),
-          }),
+          200: healthResponseSchema,
         },
       },
     },
@@ -59,17 +53,13 @@ export async function createApp() {
    * @param body.message - The message string to echo back.
    * @returns `{ message: string }`
    */
-  typed.post(
+  app.post(
     '/echo',
     {
       schema: {
-        body: z.object({
-          message: z.string(),
-        }),
+        body: echoBodySchema,
         response: {
-          200: z.object({
-            message: z.string(),
-          }),
+          200: echoResponseSchema,
         },
       },
     },
@@ -88,6 +78,7 @@ export async function createApp() {
  */
 async function start(): Promise<void> {
   const app = await createApp();
+  const port = Number(SETTINGS.PORT);
   await app.listen({ port, host: '0.0.0.0' });
   console.log(`Server started at http://localhost:${port}`);
 }
