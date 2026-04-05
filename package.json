@@ -4,33 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node src/app.ts",
-    "start": "NODE_ENV=production node dist/app.js",
-    "build": "pnpm run build:app && pnpm run build:frontend:client && pnpm run build:frontend:server",
-    "build:frontend:client": "NODE_ENV=production vite build --outDir dist/client --ssrManifest",
-    "build:frontend:server": "NODE_ENV=production vite build --outDir dist/server --ssr src/frontend/entry-server.tsx",
-    "build:app": "NODE_ENV=production vite build --config vite.config.app.ts",
+    "dev": "tsx src/app.ts",
+    "start": "NODE_ENV=production node dist/app.cjs",
+    "build": "NODE_ENV=production vite build",
     "lint": "eslint ."
   },
   "dependencies": {
     "@fastify/compress": "catalog:fastify",
-    "@fastify/middie": "catalog:fastify",
-    "@fastify/static": "catalog:fastify",
-    "@tanstack/react-router": "catalog:tanstack",
-    "@tanstack/router-vite-plugin": "catalog:tanstack",
     "fastify": "catalog:fastify",
-    "react": "catalog:react",
-    "react-dom": "catalog:react"
+    "fastify-type-provider-zod": "catalog:fastify",
+    "zod": "catalog:data"
   },
   "devDependencies": {
     "@eslint/js": "catalog:eslint",
     "@types/node": "catalog:typescript",
-    "@types/react": "catalog:react",
-    "@types/react-dom": "catalog:react",
-    "@vitejs/plugin-react": "catalog:vite",
     "eslint": "catalog:eslint",
-    "eslint-plugin-react-hooks": "catalog:eslint",
-    "eslint-plugin-react-refresh": "catalog:eslint",
     "globals": "catalog:eslint",
     "tsx": "^4.21.0",
     "typescript": "catalog:typescript",

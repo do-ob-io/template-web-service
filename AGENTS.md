@@ -1,6 +1,6 @@
 # Template Web Service Application
 
-Fastify web server with Vite-powered React SSR using TanStack Router for file-based routing. Supports both development (HMR middleware mode) and production (pre-built static + server bundles).
+Fastify backend web service with fully-typed routes using Zod validation via `fastify-type-provider-zod`.
 
 ## Quality Instructions
 
@@ -10,31 +10,44 @@ Fastify web server with Vite-powered React SSR using TanStack Router for file-ba
 
 ## Structure
 
-- `src/app.ts` — Fastify server entry point with Vite SSR middleware integration
-- `src/frontend/` — React frontend (client/server entry points, router, routes)
-- `src/frontend/router.tsx` — TanStack Router factory (shared between server and client)
-- `src/frontend/routes/` — File-based route directory (TanStack Router)
-- `src/frontend/routes/__root.tsx` — Root layout route wrapping all pages
-- `src/frontend/routes/page.tsx` — Index page (`/`) route
-- `src/frontend/route-tree.gen.ts` — Auto-generated route tree (do not edit)
-- `src/frontend/entry-client.tsx` — Client-side hydration entry
-- `src/frontend/entry-server.tsx` — Server-side render entry
-- `vite.config.ts` — Vite config for the React frontend with TanStack Router plugin
-- `vite.config.app.ts` — Vite config for building the Fastify server bundle
+- `src/app.ts` — Fastify server entry point; exports `createApp()` and calls `start()`
+- `vite.config.ts` — Vite config for building the application bundle (`dist/app.cjs`)
 
-## File-Based Routing Conventions
+## Route Conventions
 
-- **Index token**: `page` — Use `page.tsx` as the page component (like Next.js)
-- **Ignore pattern**: `^_(?!_)` — Files/directories starting with a single `_` are excluded (but `__root` is preserved)
-- **Route token**: `route` — Use `route.tsx` for route configuration (loaders, head, etc.)
-- **Root route**: `__root.tsx` — Defines the shared layout for all routes
-- Routes are defined under `src/frontend/routes/` and auto-discovered by the Vite plugin
-- `route-tree.gen.ts` is auto-generated — do not modify manually
+- Use `app.withTypeProvider<ZodTypeProvider>()` to get a fully-typed Fastify instance
+- Define `schema.body`, `schema.params`, `schema.querystring`, and `schema.response` using `z.object()`
+- All route handlers receive fully-inferred TypeScript types for request body, params, and reply
+- Group related routes into separate plugin files under `src/routes/` and register them via `app.register()`
+
+## Example Typed Route
+
+```typescript
+const typed = app.withTypeProvider<ZodTypeProvider>();
+
+typed.post(
+  "/example",
+  {
+    schema: {
+      body: z.object({ name: z.string() }),
+      response: { 200: z.object({ message: z.string() }) },
+    },
+  },
+  async (request, reply) => {
+    return reply.send({ message: `Hello, ${request.body.name}` });
+  },
+);
+```
 
 ## Technical Stack
 
 - **Language**: TypeScript
-- **Server**: Fastify (@fastify/compress, @fastify/middie, @fastify/static)
-- **Frontend**: React 19 with TanStack Router and Vite SSR
-- **Routing**: TanStack Router (file-based, SSR-compatible)
-- **Build Tool**: Vite (three-stage build: app, client, server)
+- **Server**: Fastify + `@fastify/compress`
+- **Validation**: Zod via `fastify-type-provider-zod`
+- **Build Tool**: Vite (SSR bundle → `dist/app.cjs`)
+- **Dev runner**: `tsx` (runs TypeScript directly without a build step)
+
+## Build Output
+
+- `dist/app.cjs` — Bundled server entry (CJS format, minified via esbuild)
+- Run with: `NODE_ENV=production node dist/app.cjs`

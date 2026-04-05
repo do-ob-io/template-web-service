@@ -1,109 +1,101 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import compress from '@fastify/compress';
-import middie from '@fastify/middie';
-import staticFiles from '@fastify/static';
 import Fastify from 'fastify';
-import type { ViteDevServer } from 'vite';
+import {
+  serializerCompiler,
+  validatorCompiler,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod';
+import { z } from 'zod';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const isProduction = process.env['NODE_ENV'] === 'production';
-const port = Number(process.env['PORT'] ?? 5173);
-const base = process.env['BASE'] ?? '/';
-
-/**
- * Resolves the project root directory.
- *
- * In development, `__dirname` is `<project>/src`, so root is one level up.
- * In production, `__dirname` is `<project>/dist`, so root is also one level up.
- */
-const root = path.resolve(__dirname, '..');
-
-console.log(`Starting server in ${isProduction ? 'production' : 'development'} mode...`);
-
-/** Cached production template */
-const templateHtml = isProduction
-  ? await fs.readFile(path.resolve(__dirname, 'client/index.html'), 'utf8')
-  : '';
+const port = Number(process.env['PORT'] ?? 3000);
 
 /**
- * Starts the Fastify server with Vite SSR middleware integration.
+ * Creates and configures the Fastify application instance.
  *
- * In development mode, Vite runs in middleware mode with HMR support and
- * modules are loaded on-demand via `ssrLoadModule`. In production, the
- * pre-built client and server bundles are served directly.
+ * Registers compression, installs the Zod type provider for fully-typed
+ * request validation and response serialization, and mounts all routes.
  *
- * @throws When the server fails to start or listen on the configured port.
+ * @returns The configured Fastify instance.
  */
-async function createServer(): Promise<void> {
+export async function createApp() {
   const app = Fastify({ logger: { level: 'error' } });
 
-  let vite: ViteDevServer | undefined;
+  // Zod type provider: validates incoming requests and serializes responses
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
 
-  if (isProduction) {
-    await app.register(compress);
-    await app.register(staticFiles, {
-      root: path.resolve(__dirname, 'client'),
-      prefix: base,
-      index: false,
-      wildcard: false,
-      decorateReply: false,
-    });
-  } else {
-    const { createServer: createViteServer } = await import('vite');
-    vite = await createViteServer({
-      root,
-      server: { middlewareMode: true },
-      appType: 'custom',
-      base,
-    });
+  await app.register(compress);
 
-    await app.register(middie);
-    app.use(vite.middlewares);
-  }
+  const typed = app.withTypeProvider<ZodTypeProvider>();
 
-  app.get('/*', async (request, reply) => {
-    try {
-      const url = '/' + request.url.replace(base, '');
+  /**
+   * GET /health
+   *
+   * Health check endpoint. Returns the current service status.
+   *
+   * @returns `{ status: 'ok' }`
+   */
+  typed.get(
+    '/health',
+    {
+      schema: {
+        response: {
+          200: z.object({
+            status: z.string(),
+          }),
+        },
+      },
+    },
+    async (_request, reply) => {
+      return reply.send({ status: 'ok' });
+    },
+  );
 
-      let template: string;
-      let render: (url: string) => Promise<{ html: string; head?: string }>;
+  /**
+   * POST /echo
+   *
+   * Echo endpoint. Returns the message sent in the request body.
+   *
+   * @param body.message - The message string to echo back.
+   * @returns `{ message: string }`
+   */
+  typed.post(
+    '/echo',
+    {
+      schema: {
+        body: z.object({
+          message: z.string(),
+        }),
+        response: {
+          200: z.object({
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      return reply.send({ message: request.body.message });
+    },
+  );
 
-      if (isProduction) {
-        template = templateHtml;
-        const ssrPath = path.resolve(__dirname, 'server/entry-server.js');
-        const { render: prodRender } = await import(/* @vite-ignore */ ssrPath);
-        render = prodRender as typeof render;
-      } else {
-        template = await fs.readFile(path.resolve(root, 'index.html'), 'utf8');
-        template = await vite!.transformIndexHtml(url, template);
-        const { render: devRender } = await vite!.ssrLoadModule('/src/frontend/entry-server.tsx');
-        render = devRender as typeof render;
-      }
+  return app;
+}
 
-      const rendered = await render(url);
-
-      const html = template
-        .replace('<!--app-head-->', rendered.head ?? '')
-        .replace('<!--app-html-->', rendered.html);
-
-      await reply.status(200).header('Content-Type', 'text/html').send(html);
-    } catch (error) {
-      if (error instanceof Error) {
-        vite?.ssrFixStacktrace(error);
-        console.error(error.stack);
-        await reply.status(500).send(error.stack);
-      } else {
-        await reply.status(500).send('Internal Server Error');
-      }
-    }
-  });
-
+/**
+ * Starts the HTTP server.
+ *
+ * @throws When the server fails to bind to the configured port.
+ */
+async function start(): Promise<void> {
+  const app = await createApp();
   await app.listen({ port, host: '0.0.0.0' });
   console.log(`Server started at http://localhost:${port}`);
 }
 
-await createServer();
+// CJS bundles do not support top-level await; wrap in an async IIFE instead.
+// eslint-disable-next-line unicorn/prefer-top-level-await
+void (async () => {
+  await start();
+})();
+
+
