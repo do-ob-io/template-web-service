@@ -12,6 +12,7 @@ Fastify backend web service with fully-typed routes using `@fastify/type-provide
 
 - `src/app.ts` — Fastify server entry point; exports `createApp()` and calls `start()`
 - `src/settings.ts` — Zod-validated environment settings; exports `SETTINGS` and `Settings` type
+- `src/plugins/` — Fastify plugins grouped by concern; each re-exported from `index.ts`
 - `src/schemas/` — `as const` JSON Schema definitions; each file groups schemas by domain and re-exports from `index.ts`
 - `vite.config.ts` — Vite config for building the application bundle (`dist/app.cjs`)
 

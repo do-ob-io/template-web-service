@@ -2,6 +2,7 @@ import compress from '@fastify/compress';
 import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import Fastify from 'fastify';
 
+import { swaggerPlugin } from '@/plugins/index.js';
 import {
   echoBodySchema,
   echoResponseSchema,
@@ -22,6 +23,7 @@ import { SETTINGS } from '@/settings.js';
 export async function createApp() {
   const app = Fastify({ logger: { level: 'error' } }).withTypeProvider<JsonSchemaToTsProvider>();
 
+  await swaggerPlugin(app);
   await app.register(compress);
 
   /**
@@ -78,6 +80,8 @@ export async function createApp() {
  */
 async function start(): Promise<void> {
   const app = await createApp();
+  await app.ready();
+  await app.swagger(); // Pre-generate OpenAPI spec before accepting requests
   const port = Number(SETTINGS.PORT);
   await app.listen({ port, host: '0.0.0.0' });
   console.log(`Server started at http://localhost:${port}`);
