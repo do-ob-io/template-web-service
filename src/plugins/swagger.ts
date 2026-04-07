@@ -1,5 +1,6 @@
 import swagger from '@fastify/swagger';
 import type { FastifyInstance } from 'fastify';
+import fp from 'fastify-plugin';
 
 /**
  * Registers OpenAPI v3 spec generation and mounts the spec endpoint.
@@ -11,7 +12,7 @@ import type { FastifyInstance } from 'fastify';
  *
  * @param app - The Fastify instance to register swagger on.
  */
-export async function swaggerPlugin(app: FastifyInstance): Promise<void> {
+async function swaggerPlugin(app: FastifyInstance): Promise<void> {
   await app.register(swagger, {
     openapi: {
       openapi: '3.0.0',
@@ -32,3 +33,5 @@ export async function swaggerPlugin(app: FastifyInstance): Promise<void> {
     return reply.send(app.swagger());
   });
 }
+
+export default fp(swaggerPlugin, { name: 'swagger' });

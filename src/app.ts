@@ -1,74 +1,59 @@
-import compress from '@fastify/compress';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import autoload from '@fastify/autoload';
 import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import Fastify from 'fastify';
 
-import { swaggerPlugin } from '@/plugins/index.js';
-import {
-  echoBodySchema,
-  echoResponseSchema,
-  healthResponseSchema,
-} from '@/schemas/index.js';
-import { SETTINGS } from '@/settings.js';
+import { SETTINGS } from './settings.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Registers all Fastify plugins from the `plugins/` directory.
+ *
+ * @param app - The Fastify instance.
+ * @param opts - Additional options forwarded to each plugin.
+ */
+async function registerPlugins(app: ReturnType<typeof Fastify>, opts: Record<string, unknown>) {
+  await app.register(autoload, {
+    dir: path.join(__dirname, 'plugins'),
+    options: { ...opts },
+  });
+}
+
+/**
+ * Registers all application modules from the `modules/` directory.
+ *
+ * Only files matching `*.module.ts` (or `*.module.js` in production) are loaded.
+ *
+ * @param app - The Fastify instance.
+ * @param opts - Additional options forwarded to each module.
+ */
+async function registerModules(app: ReturnType<typeof Fastify>, opts: Record<string, unknown>) {
+  await app.register(autoload, {
+    dir: path.join(__dirname, 'modules'),
+    maxDepth: 1,
+    dirNameRoutePrefix: false,
+    matchFilter: (path: string) => /\.module\.(ts|js|mjs|cjs)$/.test(path),
+    options: { ...opts },
+  });
+}
 
 /**
  * Creates and configures the Fastify application instance.
  *
- * Registers compression and mounts all routes. Request bodies are validated
- * at runtime against JSON Schemas defined in `src/schemas/`. TypeScript types
- * for handlers are inferred automatically by `@fastify/type-provider-json-schema-to-ts`.
+ * Registers plugins via autoload from the `plugins/` directory and
+ * modules via autoload from the `modules/` directory.
  *
  * @returns The configured Fastify instance.
  */
 export async function createApp() {
-  const app = Fastify({ logger: { level: 'error' } }).withTypeProvider<JsonSchemaToTsProvider>();
+  const app = Fastify({ logger: { level: 'error' } })
+    .withTypeProvider<JsonSchemaToTsProvider>();
 
-  await swaggerPlugin(app);
-  await app.register(compress);
-
-  /**
-   * GET /health
-   *
-   * Health check endpoint. Returns the current service status.
-   *
-   * @returns `{ status: 'ok' }`
-   */
-  app.get(
-    '/health',
-    {
-      schema: {
-        response: {
-          200: healthResponseSchema,
-        },
-      },
-    },
-    async (_request, reply) => {
-      return reply.send({ status: 'ok' });
-    },
-  );
-
-  /**
-   * POST /echo
-   *
-   * Echo endpoint. Returns the message sent in the request body.
-   *
-   * @param body.message - The message string to echo back.
-   * @returns `{ message: string }`
-   */
-  app.post(
-    '/echo',
-    {
-      schema: {
-        body: echoBodySchema,
-        response: {
-          200: echoResponseSchema,
-        },
-      },
-    },
-    async (request, reply) => {
-      return reply.send({ message: request.body.message });
-    },
-  );
+  await registerPlugins(app, {});
+  await registerModules(app, {});
 
   return app;
 }
@@ -81,7 +66,6 @@ export async function createApp() {
 async function start(): Promise<void> {
   const app = await createApp();
   await app.ready();
-  await app.swagger(); // Pre-generate OpenAPI spec before accepting requests
   const port = Number(SETTINGS.PORT);
   await app.listen({ port, host: '0.0.0.0' });
   console.log(`Server started at http://localhost:${port}`);

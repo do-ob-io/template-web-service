@@ -5,15 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/app.ts",
-    "start": "NODE_ENV=production node dist/app.cjs",
-    "build": "NODE_ENV=production vite build",
+    "start": "NODE_ENV=production node dist/app.mjs",
+    "build": "tsdown",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@fastify/autoload": "catalog:fastify",
     "@fastify/compress": "catalog:fastify",
+    "@fastify/cors": "catalog:fastify",
+    "@fastify/helmet": "catalog:fastify",
+    "@fastify/rate-limit": "catalog:fastify",
     "@fastify/swagger": "catalog:fastify",
-    "fastify": "catalog:fastify",
     "@fastify/type-provider-json-schema-to-ts": "catalog:fastify",
+    "fastify": "catalog:fastify",
+    "fastify-plugin": "catalog:fastify",
     "zod": "catalog:data"
   },
   "devDependencies": {
@@ -21,9 +26,9 @@
     "@types/node": "catalog:typescript",
     "eslint": "catalog:eslint",
     "globals": "catalog:eslint",
+    "tsdown": "catalog:vite",
     "tsx": "^4.21.0",
     "typescript": "catalog:typescript",
-    "typescript-eslint": "catalog:eslint",
-    "vite": "catalog:vite"
+    "typescript-eslint": "catalog:eslint"
   }
 }
