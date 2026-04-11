@@ -51,7 +51,7 @@ async function registerModules(app: ReturnType<typeof Fastify>, opts: Record<str
  * @returns The configured Fastify instance.
  */
 export async function createApp() {
-  const app = Fastify({ logger: { level: 'error' } })
+  const app = Fastify({ logger: { level: SETTINGS.LOG_LEVEL } })
     .withTypeProvider<JsonSchemaToTsProvider>();
 
   await registerPlugins(app, {});
@@ -69,8 +69,9 @@ async function start(): Promise<void> {
   const app = await createApp();
   await app.ready();
   const port = Number(SETTINGS.PORT);
-  await app.listen({ port, host: '0.0.0.0' });
-  console.log(`Server started at http://localhost:${port}`);
+  const host = SETTINGS.HOST;
+  await app.listen({ port, host });
+  console.log(`Server started at http://${host}:${port}`);
 }
 
 // CJS bundles do not support top-level await; wrap in an async IIFE instead.

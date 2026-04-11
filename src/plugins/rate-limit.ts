@@ -2,6 +2,8 @@ import rateLimit from '@fastify/rate-limit';
 import type { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 
+import { SETTINGS } from '../settings.ts';
+
 /**
  * Registers rate limiting for request throttling.
  *
@@ -9,8 +11,8 @@ import fp from 'fastify-plugin';
  */
 async function rateLimitPlugin(app: FastifyInstance): Promise<void> {
   await app.register(rateLimit, {
-    max: 100,
-    timeWindow: '1 minute',
+    max: Number.parseInt(SETTINGS.RATE_LIMIT_MAX, 10),
+    timeWindow: SETTINGS.RATE_LIMIT_TIME_WINDOW,
   });
 }
 

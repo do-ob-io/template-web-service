@@ -6,6 +6,11 @@ export const settingsSchema = z.object({
     .default('development'),
 
   /**
+   * HTTP server bind address.
+   */
+  HOST: z.string().default('0.0.0.0'),
+
+  /**
    * HTTP server port.
    */
   PORT: z
@@ -17,6 +22,37 @@ export const settingsSchema = z.object({
       message: 'PORT must be a valid port number',
     })
     .default('3000'),
+
+  /**
+   * Pino log level for the Fastify logger.
+   */
+  LOG_LEVEL: z
+    .enum([ 'fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent' ])
+    .default('error'),
+
+  /**
+   * Allowed CORS origin. Accepts a URL string or `*` for all origins.
+   * When unset, all origins are allowed (equivalent to `*`).
+   */
+  CORS_ORIGIN: z.string().optional(),
+
+  /**
+   * Maximum number of requests allowed per rate-limit window.
+   */
+  RATE_LIMIT_MAX: z
+    .string()
+    .refine((val) => {
+      const n = Number.parseInt(val, 10);
+      return !Number.isNaN(n) && n > 0;
+    }, {
+      message: 'RATE_LIMIT_MAX must be a positive integer',
+    })
+    .default('100'),
+
+  /**
+   * Duration of the rate-limit window (e.g. "1 minute", "30 seconds", or ms as a number string).
+   */
+  RATE_LIMIT_TIME_WINDOW: z.string().default('1 minute'),
 
   /**
    * Redis hostname. When set, the Redis plugin is enabled.
