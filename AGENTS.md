@@ -11,6 +11,7 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 ## Structure
 
 - `src/app.ts` — Fastify server entry point; exports `createApp()` and calls `start()`
+- `src/otel.ts` — OpenTelemetry SDK initialisation; imported at the top of `app.ts` before Fastify is created
 - `src/settings.ts` — Zod-validated environment settings; exports `SETTINGS` and `Settings` type
 - `src/plugins/` — Fastify plugins auto-loaded at startup (compress, cors, helmet, rate-limit, error-handler, sensible, swagger)
 - `src/modules/` — Business modules auto-loaded at startup; each module in `src/modules/<name>/` contains:
@@ -39,9 +40,24 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 - **Server**: Fastify + `@fastify/compress` + `@fastify/cors` + `@fastify/helmet` + `@fastify/rate-limit` + `@fastify/sensible`
 - **Auto-loading**: `@fastify/autoload` (plugins and modules)
 - **Type provider**: `@fastify/type-provider-json-schema-to-ts` (infers handler types from `as const` schemas)
+- **Observability**: `@fastify/otel` (OpenTelemetry auto-instrumentation) + `@opentelemetry/sdk-node`
 - **Settings validation**: Zod (in `src/settings.ts` only)
 - **Build Tool**: tsdown (compiles TypeScript preserving directory structure)
 - **Dev runner**: `tsx` (runs TypeScript directly without a build step)
+
+## OpenTelemetry
+
+The OTEL SDK is initialised in `src/otel.ts` and imported as the very first statement in `src/app.ts`. `FastifyOtelInstrumentation` uses `registerOnInitialization: true` so it automatically attaches to every Fastify instance before any routes are defined.
+
+Configure via environment variables (no code changes required):
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `OTEL_SERVICE_NAME` | _(none)_ | Service name shown in traces |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | OTLP collector endpoint |
+| `OTEL_TRACES_EXPORTER` | `otlp` | Set to `none` to disable trace export |
+
+To skip telemetry for a specific route, add `config: { otel: false }` to the route options.
 
 ## Sensible Conventions
 
