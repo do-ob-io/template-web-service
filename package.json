@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/app.ts",
+    "dev": "node src/app.ts",
     "start": "NODE_ENV=production node dist/app.mjs",
     "build": "tsdown",
     "lint": "eslint ."
@@ -27,7 +27,6 @@
     "eslint": "catalog:eslint",
     "globals": "catalog:eslint",
     "tsdown": "catalog:vite",
-    "tsx": "^4.21.0",
     "typescript": "catalog:typescript",
     "typescript-eslint": "catalog:eslint"
   }

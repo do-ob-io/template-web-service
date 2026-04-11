@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 
-import { healthController } from './health.controller.js';
-import { healthResponseSchema } from './health.schema.js';
+import { healthController } from './health.controller.ts';
+import { healthResponseSchema } from './health.schema.ts';
 
 /**
  * Registers health check routes.

@@ -5,7 +5,7 @@ import autoload from '@fastify/autoload';
 import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import Fastify from 'fastify';
 
-import { SETTINGS } from './settings.js';
+import { SETTINGS } from './settings.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

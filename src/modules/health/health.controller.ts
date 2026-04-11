@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import { getHealthStatus } from './health.service.js';
+import { getHealthStatus } from './health.service.ts';
 
 /**
  * Handles the health check request.

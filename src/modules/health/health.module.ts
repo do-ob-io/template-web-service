@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { healthRoutes } from './health.routes.js';
+import { healthRoutes } from './health.routes.ts';
 
 /**
  * Health module entry point.
