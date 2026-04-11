@@ -12,7 +12,7 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 
 - `src/app.ts` — Fastify server entry point; exports `createApp()` and calls `start()`
 - `src/settings.ts` — Zod-validated environment settings; exports `SETTINGS` and `Settings` type
-- `src/plugins/` — Fastify plugins auto-loaded at startup (compress, cors, helmet, rate-limit, error-handler, swagger)
+- `src/plugins/` — Fastify plugins auto-loaded at startup (compress, cors, helmet, rate-limit, error-handler, sensible, swagger)
 - `src/modules/` — Business modules auto-loaded at startup; each module in `src/modules/<name>/` contains:
   - `<name>.module.ts` — Entry point registered by autoload
   - `<name>.routes.ts` — Route definitions and schema bindings
@@ -36,12 +36,20 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 ## Technical Stack
 
 - **Language**: TypeScript
-- **Server**: Fastify + `@fastify/compress` + `@fastify/cors` + `@fastify/helmet` + `@fastify/rate-limit`
+- **Server**: Fastify + `@fastify/compress` + `@fastify/cors` + `@fastify/helmet` + `@fastify/rate-limit` + `@fastify/sensible`
 - **Auto-loading**: `@fastify/autoload` (plugins and modules)
 - **Type provider**: `@fastify/type-provider-json-schema-to-ts` (infers handler types from `as const` schemas)
 - **Settings validation**: Zod (in `src/settings.ts` only)
 - **Build Tool**: tsdown (compiles TypeScript preserving directory structure)
 - **Dev runner**: `tsx` (runs TypeScript directly without a build step)
+
+## Sensible Conventions
+
+- **HTTP errors in controllers**: throw `fastify.httpErrors.<errorName>([message])` (e.g., `fastify.httpErrors.notFound()`, `fastify.httpErrors.unauthorized()`) instead of raw `Error` objects
+- **HTTP errors in reply**: use shorthand decorators `reply.notFound()`, `reply.badRequest()`, etc. for synchronous handlers
+- **Route error response schemas**: reference the shared schema via `{ $ref: 'HttpError' }` for 4xx/5xx response entries
+- **Assertions**: use `fastify.assert(condition, statusCode, message)` or `fastify.assert.ok()` etc. to validate preconditions in controllers
+- **Async error unwrapping**: use `const [err, result] = await fastify.to(promise)` to avoid try/catch boilerplate
 
 ## Build Output
 

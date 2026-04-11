@@ -15,6 +15,7 @@
     "@fastify/cors": "catalog:fastify",
     "@fastify/helmet": "catalog:fastify",
     "@fastify/rate-limit": "catalog:fastify",
+    "@fastify/sensible": "catalog:fastify",
     "@fastify/swagger": "catalog:fastify",
     "@fastify/type-provider-json-schema-to-ts": "catalog:fastify",
     "fastify": "catalog:fastify",
