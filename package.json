@@ -13,6 +13,7 @@
     "@fastify/autoload": "catalog:fastify",
     "@fastify/compress": "catalog:fastify",
     "@fastify/cors": "catalog:fastify",
+    "@fastify/redis": "catalog:fastify",
     "@fastify/helmet": "catalog:fastify",
     "@fastify/otel": "catalog:fastify",
     "@fastify/rate-limit": "catalog:fastify",
