@@ -6,6 +6,7 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 
 - **Typecheck**: `tsc --noEmit`
 - **Lint**: `eslint --fix .`
+- **Test**: `vitest run` (or `pnpm test`)
 - **Build**: `pnpm build`
 
 ## Structure
@@ -28,11 +29,14 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 - The `*.module.ts` file is the entry point loaded by `@fastify/autoload`
 - Schemas are declared `as const` so `@fastify/type-provider-json-schema-to-ts` can statically infer handler types
 - Controllers handle request/reply; services contain pure business logic
+- Each module has a single `<name>.test.ts` with three `describe` blocks: **service** (pure unit), **controller** (mock reply with `vi.fn()`), **routes** (`app.inject()` integration)
 
 ## Plugin Conventions
 
 - Each plugin file in `src/plugins/` exports a default `fastify-plugin`-wrapped function
 - Plugins affect the global Fastify scope (not encapsulated)
+- Each plugin has a colocated `<name>.test.ts` that registers the plugin on a fresh Fastify instance and asserts its observable effects via `app.inject()`
+- When testing routes that depend on a `fastify-plugin` (e.g. rate-limit), declare the test route inside a child `app.register()` call so the plugin's `onRoute` hook fires before the route is registered
 
 ## Technical Stack
 
