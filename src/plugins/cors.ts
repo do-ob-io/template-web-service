@@ -11,9 +11,7 @@ import { SETTINGS } from '../settings.ts';
  */
 async function corsPlugin(app: FastifyInstance): Promise<void> {
   await app.register(cors, {
-    ...(SETTINGS.CORS_ORIGIN !== undefined && {
-      origin: SETTINGS.CORS_ORIGIN,
-    }),
+    origin: SETTINGS.CORS_ORIGIN ?? `http://localhost:${SETTINGS.PORT}`,
   });
 }
 
