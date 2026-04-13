@@ -5,8 +5,8 @@ Fastify backend web service with modular architecture, fully-typed routes using 
 ## Quality Instructions
 
 - **Typecheck**: `tsc --noEmit`
-- **Lint**: `eslint --fix .`
-- **Test**: `vitest run` (or `pnpm test`)
+- **Lint**: `pnpm lint`
+- **Test**: `pnpm test`
 - **Build**: `pnpm build`
 
 ## Structure
