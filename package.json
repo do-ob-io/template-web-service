@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "node src/app.ts",
     "start": "NODE_ENV=production node dist/app.mjs",
-    "build": "tsdown",
-    "lint": "eslint ."
+    "build": "tsdown"
   },
   "dependencies": {
     "@fastify/autoload": "catalog:fastify",
@@ -28,13 +27,9 @@
     "zod": "catalog:data"
   },
   "devDependencies": {
-    "@eslint/js": "catalog:eslint",
     "@types/node": "catalog:typescript",
-    "eslint": "catalog:eslint",
-    "globals": "catalog:eslint",
     "tsdown": "catalog:vite",
     "typescript": "catalog:typescript",
-    "typescript-eslint": "catalog:eslint",
     "vitest": "catalog:vite"
   }
 }

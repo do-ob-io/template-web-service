@@ -20,6 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 async function registerPlugins(app: ReturnType<typeof Fastify>, opts: Record<string, unknown>) {
   await app.register(autoload, {
     dir: path.join(__dirname, 'plugins'),
+    matchFilter: (path: string) => !/\.test\.(ts|js|mjs|cjs)$/.test(path),
     options: { ...opts },
   });
 }
